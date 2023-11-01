@@ -3,6 +3,8 @@ package com.example.TelegramBot.Service;
 import com.example.TelegramBot.Config.BotConfig;
 import com.example.TelegramBot.Model.User;
 import com.example.TelegramBot.Model.UserRepository;
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.glassfish.grizzly.http.util.TimeStamp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,8 +102,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
 
+    //https://emojipedia.org/smileys
     private void startCommandReceived(long chatID, String firstName){
-    String answer="Hello, " +firstName+ " , nice to meet you!";
+      String answer= EmojiParser.
+              parseToUnicode("Hello, " +firstName+ " , nice to meet you! :star_struck:");
     log.info("Replied to user "+firstName);
     sendMessage(chatID,answer);
     }
