@@ -1,16 +1,23 @@
 package com.example.TelegramBot.Service;
 
 import com.example.TelegramBot.Config.BotConfig;
+import com.example.TelegramBot.Model.User;
+import com.example.TelegramBot.Model.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.glassfish.grizzly.http.util.TimeStamp;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +25,8 @@ import java.util.List;
 @Slf4j
 public class TelegramBot extends TelegramLongPollingBot {
 
+    @Autowired
+    private UserRepository userRepository;
     private final BotConfig botConfig;
     public static final String HELP_MESSGE="HELLO THIS IS MEN\n" +
             "Type /start get a welcome message\n"+
@@ -61,7 +70,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             String messageText=update.getMessage().getText();
             long chatID=update.getMessage().getChatId();
             switch (messageText){
-                case "/start": startCommandReceived(chatID,update.
+                case "/start":
+                    registredUser(update.getMessage());
+                    startCommandReceived(chatID,update.
                         getMessage().
                         getChat().
                         getFirstName());break;
@@ -72,6 +83,23 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
         }
     }
+
+    private void registredUser(Message message) {
+        if(userRepository.findById(message.getChatId()).isEmpty()){
+            var chat=message.getChat();
+            var chatID=message.getChatId();
+            User user=new User();
+            user.setChatId(chatID);
+            user.setUsername(chat.getUserName());
+            user.setFirstName(chat.getFirstName());
+            user.setLastName(chat.getLastName());
+            user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
+            userRepository.save(user);
+            log.info("User is created "+user.getUsername());
+        }
+
+    }
+
     private void startCommandReceived(long chatID, String firstName){
     String answer="Hello, " +firstName+ " , nice to meet you!";
     log.info("Replied to user "+firstName);
