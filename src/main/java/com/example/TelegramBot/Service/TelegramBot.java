@@ -55,7 +55,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<BotCommand> listOfCommands=new ArrayList<>();
         listOfCommands.add(new BotCommand("/start","get a welcome message"));
         listOfCommands.add(new BotCommand("/myBirthday","get your day of birthday"));
-        listOfCommands.add(new BotCommand("/deletedata","delete my data"));
         listOfCommands.add(new BotCommand("/help","info how to use this bot"));
         listOfCommands.add(new BotCommand("/settings","set your preferences"));
         try {
@@ -118,6 +117,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                log.info("Sending birthday for " +message.getChat().getUserName());break;
            case "Юлія Гребенюк": sendMessage(message.getChatId(),"27.08.92");
                log.info("Sending birthday for " +message.getChat().getUserName());break;
+           case "Dmitriy Sviatukhov": sendMessage(message.getChatId(),"08.08.91");
+               log.info("Sending birthday for " +message.getChat().getUserName());break;
        }
     }
 
@@ -143,7 +144,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardRow.add("time");
         keyboardRows.add(keyboardRow);
         keyboardRow=new KeyboardRow();
-        keyboardRow.add("Exchange Rates");
+        keyboardRow.add("КУРСИ ВАЛЮТ");
         keyboardRows.add(keyboardRow);
         keyboard.setKeyboard(keyboardRows);
         return keyboard;
@@ -219,7 +220,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                         getFirstName());break;
             case "/myBirthday": myData(update.getMessage());break;
             case "/help": sendMessage(chatID,HELP_MESSGE);break;
-            case "Exchange Rates": exchangeRates(chatID);break;
+            case "КУРСИ ВАЛЮТ": exchangeRates(chatID);break;
+
             default:sendMessage(chatID,"Sorry,command was not recognized ");
 
         }
@@ -232,7 +234,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         switch (data){
             case "PRIVATBANK":  exchangeRatesIntoPB(chatID);break;
             case "ГОТІВКОВИЙ":
-            case "БЕЗГОТІВКОВИЙ":  
+            case "БЕЗГОТІВКОВИЙ":
             sendMessage(chatID,privatBankService.getExchangeRates(data));break;
         }
     }
