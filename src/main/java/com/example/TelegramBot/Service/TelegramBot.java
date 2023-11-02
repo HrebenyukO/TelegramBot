@@ -17,6 +17,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
@@ -32,7 +35,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     public static final String HELP_MESSGE="HELLO THIS IS MEN\n" +
             "Type /start get a welcome message\n"+
-            "Type /mydata get your data stored\n"+
+            "Type /myBirthday get your data stored\n"+
             "Type /deletedata delete my data\n"+
             "Type /settings set your preferences";
 
@@ -45,7 +48,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void addCommandsForMainMenu(){
         List<BotCommand> listOfCommands=new ArrayList<>();
         listOfCommands.add(new BotCommand("/start","get a welcome message"));
-        listOfCommands.add(new BotCommand("/mydata","get your data stored"));
+        listOfCommands.add(new BotCommand("/myBirthday","get your day of birthday"));
         listOfCommands.add(new BotCommand("/deletedata","delete my data"));
         listOfCommands.add(new BotCommand("/help","info how to use this bot"));
         listOfCommands.add(new BotCommand("/settings","set your preferences"));
@@ -78,8 +81,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                         getMessage().
                         getChat().
                         getFirstName());break;
-                case "/mydata": myData(chatID);break;
+                case "/myBirthday": myData(update.getMessage());break;
                 case "/help": sendMessage(chatID,HELP_MESSGE);break;
+
+                case " $ ": sendMessage(chatID,"https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=5");break;
 
                 default:sendMessage(chatID,"Sorry,command was not recognized ");
             }
@@ -110,21 +115,47 @@ public class TelegramBot extends TelegramLongPollingBot {
     sendMessage(chatID,answer);
     }
 
-    private void myData(long chatID){
-      String birtDay="Your birtday 23.03.92";
-      log.info("Sending data");
-      sendMessage(chatID,birtDay);
+    private void myData(Message message){
+       String name= message.getChat().getFirstName();
+       String surname=message.getChat().getLastName();
+
+       switch (name+" "+surname){
+           case "Олексій Гребенюк": sendMessage(message.getChatId(),"23.03.92");
+               log.info("Sending birthday for " +message.getChat().getUserName());break;
+           case "Юлія Гребенюк": sendMessage(message.getChatId(),"27.08.92");
+               log.info("Sending birthday for " +message.getChat().getUserName());break;
+       }
     }
 
     private void sendMessage(long chatID,String textToSend){
         SendMessage message=new SendMessage();
         message.setChatId(chatID);
         message.setText(textToSend);
+        ReplyKeyboardMarkup keyboard = getReplyKeyboardMarkup();
+        message.setReplyMarkup(keyboard);
         try {
             execute(message);
         } catch (TelegramApiException e) {
            log.error("Error occured: "+e.getMessage());
         }
 
+    }
+
+    private static ReplyKeyboardMarkup getReplyKeyboardMarkup() {
+        ReplyKeyboardMarkup keyboard=new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows=new ArrayList<>();
+        KeyboardRow keyboardRow=new KeyboardRow();
+        keyboardRow.add("weather");
+        keyboardRow.add("news");
+        keyboardRow.add("time");
+        keyboardRows.add(keyboardRow);
+        keyboardRow=new KeyboardRow();
+        keyboardRow.add(" $ ");
+        keyboardRow.add(" ₴ ");
+        keyboardRow.add(" € ");
+        keyboardRows.add(keyboardRow);
+
+        keyboard.setKeyboard(keyboardRows);
+        return keyboard;
     }
 }
