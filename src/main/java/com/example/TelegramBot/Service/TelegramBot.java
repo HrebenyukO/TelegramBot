@@ -17,8 +17,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -72,21 +74,18 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage()  &&   update.getMessage().hasText()){
-            String messageText=update.getMessage().getText();
-            long chatID=update.getMessage().getChatId();
-            switch (messageText){
-                case "/start":
-                    registredUser(update.getMessage());
-                    startCommandReceived(chatID,update.
-                        getMessage().
-                        getChat().
-                        getFirstName());break;
-                case "/myBirthday": myData(update.getMessage());break;
-                case "/help": sendMessage(chatID,HELP_MESSGE);break;
-
-                case " $ ": sendMessage(chatID,"https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=5");break;
-
-                default:sendMessage(chatID,"Sorry,command was not recognized ");
+            log.info("HAS MESSAGE START");
+            hasMessage(update);
+            }
+        else if(update.hasCallbackQuery()) {
+            log.info("CALL BACK QUERY START");
+            String data=update.getCallbackQuery().getData();
+            long messageID=update.getCallbackQuery().getMessage().getMessageId();
+            long chatID=update.getCallbackQuery().getMessage().getChatId();
+            switch (data){
+                case "DOLLAR": sendMessage(chatID,"37.5");break;
+                case "GRIVNA": sendMessage(chatID,"37.5");break;
+                case "EVRO": sendMessage(chatID,"40.5");break;
             }
         }
     }
@@ -106,7 +105,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
 
     }
-
     //https://emojipedia.org/smileys
     private void startCommandReceived(long chatID, String firstName){
       String answer= EmojiParser.
@@ -118,7 +116,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void myData(Message message){
        String name= message.getChat().getFirstName();
        String surname=message.getChat().getLastName();
-
        switch (name+" "+surname){
            case "Олексій Гребенюк": sendMessage(message.getChatId(),"23.03.92");
                log.info("Sending birthday for " +message.getChat().getUserName());break;
@@ -131,17 +128,16 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendMessage message=new SendMessage();
         message.setChatId(chatID);
         message.setText(textToSend);
-        ReplyKeyboardMarkup keyboard = getReplyKeyboardMarkup();
+        ReplyKeyboardMarkup keyboard = mainMenu();
         message.setReplyMarkup(keyboard);
         try {
             execute(message);
         } catch (TelegramApiException e) {
            log.error("Error occured: "+e.getMessage());
         }
-
     }
 
-    private static ReplyKeyboardMarkup getReplyKeyboardMarkup() {
+    private static ReplyKeyboardMarkup mainMenu() {
         ReplyKeyboardMarkup keyboard=new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows=new ArrayList<>();
         KeyboardRow keyboardRow=new KeyboardRow();
@@ -150,6 +146,16 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardRow.add("time");
         keyboardRows.add(keyboardRow);
         keyboardRow=new KeyboardRow();
+        keyboardRow.add("Exchange Rates");
+        keyboardRows.add(keyboardRow);
+        keyboard.setKeyboard(keyboardRows);
+        return keyboard;
+    }
+
+    private static ReplyKeyboardMarkup ExchangeRates() {
+        ReplyKeyboardMarkup keyboard=new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows=new ArrayList<>();
+        KeyboardRow keyboardRow=new KeyboardRow();
         keyboardRow.add(" $ ");
         keyboardRow.add(" ₴ ");
         keyboardRow.add(" € ");
@@ -157,5 +163,52 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         keyboard.setKeyboard(keyboardRows);
         return keyboard;
+    }
+
+    private void exchangeRates(long chatID) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatID);
+        message.setText("Exchange Rates");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+        List<InlineKeyboardButton> rowInLine = new ArrayList<>();
+        var button$ = new InlineKeyboardButton();
+        button$.setText(" $ ");
+        button$.setCallbackData("DOLLAR");
+        var button₴ = new InlineKeyboardButton();
+        button₴.setText(" ₴ ");
+        button₴.setCallbackData("GRIVNA");
+        var button€ = new InlineKeyboardButton();
+        button€.setText(" € ");
+        button€.setCallbackData("EVRO");
+        rowInLine.add(button₴);
+        rowInLine.add(button$);
+        rowInLine.add(button€);
+        rowsInLine.add(rowInLine);
+        inlineKeyboardMarkup.setKeyboard(rowsInLine);
+        message.setReplyMarkup(inlineKeyboardMarkup);
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void hasMessage(Update update){
+        String messageText=update.getMessage().getText();
+        long chatID=update.getMessage().getChatId();
+        switch (messageText){
+            case "/start":
+                registredUser(update.getMessage());
+                startCommandReceived(chatID,update.
+                        getMessage().
+                        getChat().
+                        getFirstName());break;
+            case "/myBirthday": myData(update.getMessage());break;
+            case "/help": sendMessage(chatID,HELP_MESSGE);break;
+            case "Exchange Rates": exchangeRates(chatID);break;
+            default:sendMessage(chatID,"Sorry,command was not recognized ");
+
+        }
     }
 }
