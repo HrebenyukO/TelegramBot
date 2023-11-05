@@ -5,8 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.example.TelegramBot.Model.*;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,4 +58,21 @@ public class PrivatBankService {
             stringBuilder.append("Sale Rate: ").append(rate.getSale()).append("\n\n");
         });
         return stringBuilder.toString();}
+
+    public InlineKeyboardMarkup exchangeRatesIntoPB() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+        List<InlineKeyboardButton> rowInLine = new ArrayList<>();
+        var buttonGotivka = new InlineKeyboardButton();
+        buttonGotivka.setText("ГОТІВКОВИЙ");
+        buttonGotivka.setCallbackData("ГОТІВКОВИЙ");
+        var buutonBezgotivka = new InlineKeyboardButton();
+        buutonBezgotivka.setText("БЕЗГОТІВКОВИЙ");
+        buutonBezgotivka.setCallbackData("БЕЗГОТІВКОВИЙ");
+        rowInLine.add(buutonBezgotivka);
+        rowInLine.add(buttonGotivka);
+        rowsInLine.add(rowInLine);
+        inlineKeyboardMarkup.setKeyboard(rowsInLine);
+        return inlineKeyboardMarkup;
+    }
 }

@@ -140,7 +140,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<KeyboardRow> keyboardRows=new ArrayList<>();
         KeyboardRow keyboardRow=new KeyboardRow();
         keyboardRow.add("weather");
-        keyboardRow.add("news");
+        keyboardRow.add("СПИСОК ПОКУПОК");
         keyboardRow.add("time");
         keyboardRows.add(keyboardRow);
         keyboardRow=new KeyboardRow();
@@ -150,18 +150,19 @@ public class TelegramBot extends TelegramLongPollingBot {
         return keyboard;
     }
 
-   /* private static ReplyKeyboardMarkup ExchangeRates() {
-        ReplyKeyboardMarkup keyboard=new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows=new ArrayList<>();
-        KeyboardRow keyboardRow=new KeyboardRow();
-        keyboardRow.add(" $ ");
-        keyboardRow.add(" ₴ ");
-        keyboardRow.add(" € ");
-        keyboardRows.add(keyboardRow);
 
-        keyboard.setKeyboard(keyboardRows);
-        return keyboard;
-    }*/
+    public void exchangeRatesIntoPB(long chatID) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatID);
+        message.setText("Курси валют у ПриватБанку ");
+
+        message.setReplyMarkup(privatBankService.exchangeRatesIntoPB());
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void exchangeRates(long chatID) {
         SendMessage message = new SendMessage();
@@ -171,9 +172,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
         List<InlineKeyboardButton> rowInLine = new ArrayList<>();
         var buttonPB = new InlineKeyboardButton();
+        var buttonNacBank=new InlineKeyboardButton();
         buttonPB.setText("PRIVATBANK");
         buttonPB.setCallbackData("PRIVATBANK");
+        buttonNacBank.setText("НАЦБАНК");
+        buttonNacBank.setCallbackData("НАЦБАНК");
         rowInLine.add(buttonPB);
+        rowInLine.add(buttonNacBank);
         rowsInLine.add(rowInLine);
         inlineKeyboardMarkup.setKeyboard(rowsInLine);
         message.setReplyMarkup(inlineKeyboardMarkup);
@@ -183,30 +188,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
     }
-    private void exchangeRatesIntoPB(long chatID) {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatID);
-        message.setText("Курси валют у ПриватБанку ");
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
-        List<InlineKeyboardButton> rowInLine = new ArrayList<>();
-        var buttonGotivka = new InlineKeyboardButton();
-        buttonGotivka.setText("ГОТІВКОВИЙ");
-        buttonGotivka.setCallbackData("ГОТІВКОВИЙ");
-        var buutonBezgotivka = new InlineKeyboardButton();
-        buutonBezgotivka.setText("БЕЗГОТІВКОВИЙ");
-        buutonBezgotivka.setCallbackData("БЕЗГОТІВКОВИЙ");
-        rowInLine.add(buutonBezgotivka);
-        rowInLine.add(buttonGotivka);
-        rowsInLine.add(rowInLine);
-        inlineKeyboardMarkup.setKeyboard(rowsInLine);
-        message.setReplyMarkup(inlineKeyboardMarkup);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
     private void hasMessage(Update update){
         String messageText=update.getMessage().getText();
