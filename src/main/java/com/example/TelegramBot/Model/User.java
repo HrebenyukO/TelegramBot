@@ -25,7 +25,6 @@ public class User {
 
     private Timestamp registeredAt;
 
-
     @Override
     public String toString() {
         return "User{" +

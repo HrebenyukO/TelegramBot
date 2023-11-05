@@ -34,16 +34,14 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
     PrivatBankService privatBankService;
     private final BotConfig botConfig;
     public static final String HELP_MESSGE="HELLO THIS IS MEN\n" +
             "Type /start get a welcome message\n"+
-            "Type /myBirthday get your data stored\n"+
-            "Type /deletedata delete my data\n"+
-            "Type /settings set your preferences";
+            "Type /myBirthday get your data stored";
 
 
     public TelegramBot(BotConfig botConfig){
@@ -74,6 +72,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         return botConfig.getBotName();
     }
 
+
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage()  &&   update.getMessage().hasText()){
@@ -87,20 +86,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void registredUser(Message message) {
-        if(userRepository.findById(message.getChatId()).isEmpty()){
-            var chat=message.getChat();
-            var chatID=message.getChatId();
-            User user=new User();
-            user.setChatId(chatID);
-            user.setUsername(chat.getUserName());
-            user.setFirstName(chat.getFirstName());
-            user.setLastName(chat.getLastName());
-            user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
-            userRepository.save(user);
-            log.info("User is created "+user.getUsername());
+            userService.registredUser(message);
         }
 
-    }
+
     //https://emojipedia.org/smileys
     private void startCommandReceived(long chatID, String firstName){
       String answer= EmojiParser.
@@ -109,18 +98,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     sendMessage(chatID,answer);
     }
 
-    private void myData(Message message){
-       String name= message.getChat().getFirstName();
-       String surname=message.getChat().getLastName();
-       switch (name+" "+surname){
-           case "Олексій Гребенюк": sendMessage(message.getChatId(),"23.03.92");
-               log.info("Sending birthday for " +message.getChat().getUserName());break;
-           case "Юлія Гребенюк": sendMessage(message.getChatId(),"27.08.92");
-               log.info("Sending birthday for " +message.getChat().getUserName());break;
-           case "Dmitriy Sviatukhov": sendMessage(message.getChatId(),"08.08.91");
-               log.info("Sending birthday for " +message.getChat().getUserName());break;
-       }
-    }
+
 
     private void sendMessage(long chatID,String textToSend){
         SendMessage message=new SendMessage();
@@ -149,7 +127,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboard.setKeyboard(keyboardRows);
         return keyboard;
     }
-
 
     public void exchangeRatesIntoPB(long chatID) {
         SendMessage message = new SendMessage();
@@ -188,8 +165,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
     }
-
-
+    
     private void hasMessage(Update update){
         String messageText=update.getMessage().getText();
         long chatID=update.getMessage().getChatId();
@@ -200,7 +176,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                         getMessage().
                         getChat().
                         getFirstName());break;
-            case "/myBirthday": myData(update.getMessage());break;
             case "/help": sendMessage(chatID,HELP_MESSGE);break;
             case "КУРСИ ВАЛЮТ": exchangeRates(chatID);break;
 
@@ -211,7 +186,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void hasQuery(Update update){
         String data=update.getCallbackQuery().getData();
-        long messageID=update.getCallbackQuery().getMessage().getMessageId();
         long chatID=update.getCallbackQuery().getMessage().getChatId();
         switch (data){
             case "PRIVATBANK":  exchangeRatesIntoPB(chatID);break;
