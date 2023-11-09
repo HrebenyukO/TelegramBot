@@ -1,7 +1,7 @@
 package com.example.TelegramBot.Service;
 
 import com.example.TelegramBot.Config.BotConfig;
-
+import com.example.TelegramBot.Service.*;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -22,6 +24,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 
+import java.io.File;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -41,6 +44,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     BankService bankService;
+
+    @Autowired
+    ChartService chartService;
     private final BotConfig botConfig;
     public static final String HELP_MESSGE="HELLO THIS IS MEN\n" +
             "Type /start get a welcome message\n"+
@@ -115,6 +121,28 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+   /* public SendMessage sendChart(Message message) {
+        // Generate your chart here
+
+        File imageFile = new File("chart.png");
+        // Assume you have saved the chart as an image file named chart.png
+
+        SendPhoto sendPhotoRequest = new SendPhoto();
+        sendPhotoRequest.setChatId(message.getChatId().toString());
+        sendPhotoRequest.setReplyToMessageId(message.getMessageId());
+        sendPhotoRequest.setPhoto(new InputFile(imageFile));
+
+        try {
+          execute(sendPhotoRequest);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }*/
+
+
+
     private static ReplyKeyboardMarkup mainMenu() {
         ReplyKeyboardMarkup keyboard=new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows=new ArrayList<>();
@@ -181,6 +209,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             case "ГОТІВКОВИЙ":
             case "БЕЗГОТІВКОВИЙ":
             sendMessage(chatID,privatBankService.getExchangeRates(data));break;
+            case  "AНАЛІТИКА": sendMessage(chatID,"Знаходиться у розробці");
         }
     }
 }

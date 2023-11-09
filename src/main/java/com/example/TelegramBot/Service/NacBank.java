@@ -16,7 +16,7 @@ public class NacBank{
     public String getExchangeRates() {
         RestTemplate restTemplate = new RestTemplate();
         String response=null;
-        String json=json=restTemplate.getForObject(
+        String json=restTemplate.getForObject(
                 NAC_BANK_API_URL_ExchangeRate,String.class);
        response=view(json);
         return response;

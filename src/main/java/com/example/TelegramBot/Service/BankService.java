@@ -16,12 +16,16 @@ public class BankService {
         List<InlineKeyboardButton> rowInLine = new ArrayList<>();
         var buttonPB = new InlineKeyboardButton();
         var buttonNacBank=new InlineKeyboardButton();
+        var buttonAnalyzeER=new InlineKeyboardButton();
         buttonPB.setText("PRIVATBANK");
         buttonPB.setCallbackData("PRIVATBANK");
         buttonNacBank.setText("НАЦБАНК");
         buttonNacBank.setCallbackData("НАЦБАНК");
+        buttonAnalyzeER.setText("AНАЛІТИКА КУРСУ ВАЛЮТ");
+        buttonAnalyzeER.setCallbackData("AНАЛІТИКА");
         rowInLine.add(buttonPB);
         rowInLine.add(buttonNacBank);
+        rowInLine.add(buttonAnalyzeER);
         rowsInLine.add(rowInLine);
         inlineKeyboardMarkup.setKeyboard(rowsInLine);
         return inlineKeyboardMarkup;
