@@ -106,8 +106,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     sendMessage(chatID,answer);
     }
 
-
-
     private void sendMessage(long chatID,String textToSend){
         SendMessage message=new SendMessage();
         message.setChatId(chatID);
@@ -121,25 +119,19 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-   /* public SendMessage sendChart(Message message) {
-        // Generate your chart here
-
+    public void sendChart(long chatID,InputFile inputFile) {
+        SendMessage message=new SendMessage();
+        message.setChatId(chatID);
         File imageFile = new File("chart.png");
-        // Assume you have saved the chart as an image file named chart.png
-
         SendPhoto sendPhotoRequest = new SendPhoto();
         sendPhotoRequest.setChatId(message.getChatId().toString());
-        sendPhotoRequest.setReplyToMessageId(message.getMessageId());
-        sendPhotoRequest.setPhoto(new InputFile(imageFile));
-
+        sendPhotoRequest.setPhoto(inputFile);
         try {
-          execute(sendPhotoRequest);
+           execute(sendPhotoRequest);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-
-        return null;
-    }*/
+    }
 
 
 
@@ -162,7 +154,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.setChatId(chatID);
         message.setText("Курси валют ПриватБанку ");
-
         message.setReplyMarkup(privatBankService.exchangeRatesIntoPB());
         try {
             execute(message);
@@ -209,7 +200,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             case "ГОТІВКОВИЙ":
             case "БЕЗГОТІВКОВИЙ":
             sendMessage(chatID,privatBankService.getExchangeRates(data));break;
-            case  "AНАЛІТИКА": sendMessage(chatID,"Знаходиться у розробці");
+            case  "AНАЛІТИКА": sendChart(chatID,chartService.sendChart());break;
         }
     }
 }
