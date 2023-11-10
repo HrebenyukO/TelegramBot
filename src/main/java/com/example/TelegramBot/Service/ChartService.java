@@ -24,8 +24,7 @@ public class ChartService  {
         try {
             File imageFile = new File("chart.png");
             ChartUtils.saveChartAsPNG(imageFile, lineChart, 600, 400);
-            InputFile inputFile = new InputFile(imageFile);
-            return inputFile;
+            return new InputFile(imageFile);
 
         } catch (IOException e) {
             throw new RuntimeException(e);

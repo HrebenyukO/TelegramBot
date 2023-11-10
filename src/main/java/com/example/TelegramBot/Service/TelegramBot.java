@@ -47,6 +47,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     ChartService chartService;
+
+    @Autowired
+    TimeService timeService;
     private final BotConfig botConfig;
     public static final String HELP_MESSGE="HELLO THIS IS MEN\n" +
             "Type /start get a welcome message\n"+
@@ -141,7 +144,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         KeyboardRow keyboardRow=new KeyboardRow();
         keyboardRow.add("weather");
         keyboardRow.add("СПИСОК ПОКУПОК");
-        keyboardRow.add("time");
+        keyboardRow.add("Time");
         keyboardRows.add(keyboardRow);
         keyboardRow=new KeyboardRow();
         keyboardRow.add("КУРСИ ВАЛЮТ");
@@ -186,6 +189,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         getFirstName());break;
             case "/help": sendMessage(chatID,HELP_MESSGE);break;
             case "КУРСИ ВАЛЮТ": exchangeRates(chatID);break;
+            case "Time": sendMessage(chatID,timeService.getTime());break;
             default:sendMessage(chatID,"Sorry,command was not recognized ");
 
         }
